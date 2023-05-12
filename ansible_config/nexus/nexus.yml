@@ -22,11 +22,3 @@
 
   - name: Start Nexus
     shell: /home/ubuntu/nexus-3.53.0-01/bin/nexus start
-
-  - name: Fetch initial admin password 
-    shell: cat /home/ubuntu/sonatype-work/nexus3/admin.password
-    register: admin_password
-    
-  - name: Display initial admin password
-    debug:
-      msg: "Admin password is {{ admin_password.stdout }}"
