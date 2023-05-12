@@ -1,6 +1,6 @@
 #!/bin/bash
 
-echo -e "Creating inventory file for ansible ....\n"
+echo -e "\nCreating inventory file for ansible ....\n"
 
 cat <<EOF > ../ansible_config/inventory
 jenkins    ansible_host=  ansible_user=ubuntu ansible_connection=ssh
