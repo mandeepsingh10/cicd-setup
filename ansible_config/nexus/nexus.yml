@@ -1,0 +1,32 @@
+---
+- name: Install Nexus
+  hosts: nexus
+  become: true
+
+  tasks:
+  - name: Install Java 8
+    apt:
+      name: openjdk-8-jdk
+      state: present
+
+  - name: Download Nexus
+    get_url:
+      url: https://download.sonatype.com/nexus/3/nexus-3.53.0-01-unix.tar.gz
+      dest: /tmp/nexus-3.53.0-01-unix.tar.gz
+
+  - name: Extract Nexus
+    unarchive:
+      src: /tmp/nexus-3.53.0-01-unix.tar.gz
+      dest: /home/ubuntu/
+      remote_src: yes
+
+  - name: Start Nexus
+    shell: /home/ubuntu/nexus-3.53.0-01/bin/nexus start
+
+  - name: Fetch initial admin password 
+    shell: cat /home/ubuntu/sonatype-work/nexus3/admin.password
+    register: admin_password
+    
+  - name: Display initial admin password
+    debug:
+      msg: "Admin password is {{ admin_password.stdout }}"

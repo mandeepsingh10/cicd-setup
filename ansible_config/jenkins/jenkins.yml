@@ -1,0 +1,124 @@
+---
+####### ANSIBLE PLAY TO INSTALL Jenkins ######### 
+ - name: Install and start Jenkins
+   hosts: jenkins
+   become: yes
+ 
+   tasks:
+    - name: ensure the jenkins apt repository key is installed
+      apt_key: url=https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key state=present
+
+    - name: ensure the repository is configured
+      apt_repository: repo='deb https://pkg.jenkins.io/debian-stable binary/' state=present
+
+    - name: Ensure java is installed
+      apt: name=openjdk-11-jre state=present
+
+    - name: ensure jenkins is installed
+      apt: name=jenkins update_cache=yes
+
+    - name: ensure jenkins is running
+      service: name=jenkins state=started
+
+####### ANSIBLE PLAY TO INSTALL HELM ######### 
+ - name: Install Helm and datree.io helm plugin
+   hosts: jenkins
+   become: true
+  
+   tasks:
+    - name: Check if Helm is installed
+      shell: helm version
+      register: helm_check
+      changed_when: false
+      ignore_errors: yes
+
+    - name: Download Helm script
+      get_url:
+        url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+        dest: /tmp/get_helm.sh
+        mode: 0755
+      when: helm_check.rc != 0
+
+    - name: Install Helm
+      shell: /tmp/get_helm.sh
+      when: helm_check.rc != 0
+    
+    - name: Install unzip
+      apt: name=unzip state=present
+   
+    - name: Check if Datree plugin exists ###### Checks if datree plugin exists if not then installs it 
+      shell: "helm plugin list | grep datree"
+      register: datree_check
+      failed_when: datree_check.rc != 1 and datree_check.rc != 0
+      changed_when: false
+      check_mode: no      
+    - name: Install Datree plugin
+      shell: "helm plugin install https://github.com/datreeio/helm-datree"
+      when: datree_check.rc != 0  
+
+####### ANSIBLE PLAY TO INSTALL DOCKER #########  
+ - name: Install Docker
+   hosts: jenkins
+   become: true
+
+   tasks:
+    - name: Install required packages
+      apt:
+        name:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - gnupg-agent
+        - software-properties-common
+        state: present
+
+    - name: Add Docker GPG key
+      apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        state: present
+
+    - name: Add Docker repository
+      apt_repository:
+        repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+
+    - name: Install Docker 
+      apt:
+        name:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        state: present 
+
+    - name: Add jenkins to sudo group
+      user:
+        name: jenkins
+        groups: sudo
+        append: yes
+
+    - name: Add jenkins to docker group
+      user:
+        name: jenkins
+        groups: docker
+        append: yes
+
+    - name: Add jenkins to sudoers file
+      lineinfile:
+        path: /etc/sudoers
+        line: 'jenkins ALL=(ALL) NOPASSWD: ALL'    
+
+    - name: Install kubectl 
+      snap: 
+        name: kubectl
+        classic: true
+        state: present
+
+    - name: Create kubectl alias for root user
+      lineinfile:
+        dest: /root/.bashrc
+        line: 'alias k=kubectl'
+        state: present
+        regexp: '^alias k='
+    
+
+ 
