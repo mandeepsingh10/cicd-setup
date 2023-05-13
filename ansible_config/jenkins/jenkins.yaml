@@ -56,7 +56,7 @@
       shell: "helm plugin install https://github.com/datreeio/helm-datree"
       when: datree_check.rc != 0  
 
-####### ANSIBLE PLAY TO INSTALL DOCKER #########  
+####### ANSIBLE PLAY to INSTALL DOCKER, ADD jenkins user to docker and sudo groups, give access to sudo commands to jenkins user, INSTALL KUBECTL and CONFIGURE k=kubectl alias for the root user. #########  
  - name: Install Docker
    hosts: jenkins
    become: true
@@ -107,7 +107,7 @@
         path: /etc/sudoers
         line: 'jenkins ALL=(ALL) NOPASSWD: ALL'    
 
-    - name: Install kubectl 
+    - name: Install kubectl  #### Required for Stage V & VI : Deploying application on k8s cluster
       snap: 
         name: kubectl
         classic: true

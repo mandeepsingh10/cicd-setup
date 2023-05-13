@@ -10,9 +10,8 @@
 - name: Setup k8s Control Plane (master) node
   hosts: k8s-master
   become: true
-
   tasks:
-    - name: Copy master.sh script to remote server
+    - name: Copy master.sh script to k8s control plane node
       copy:
         src: master.sh
         dest: /root/master.sh
@@ -41,7 +40,6 @@
 - name: Configure kubectl for ubuntu user
   hosts: k8s-master
   become: true
-
   tasks:
     - name: Create .kube directory for ubuntu user
       file:
@@ -49,7 +47,6 @@
         state: directory
         owner: ubuntu
         group: ubuntu
-
     - name: Copy admin.conf to ubuntu's .kube directory
       copy:
         remote_src: "true"
@@ -58,13 +55,11 @@
         owner: ubuntu
         group: ubuntu
         mode: '0644'
-
     - name: Change ownership of .kube/config file
       file:
         path: /home/ubuntu/.kube/config
         owner: ubuntu
         group: ubuntu
-     
     - name: Create kubectl alias for ubuntu 
       lineinfile:
         dest: /home/ubuntu/.bashrc
@@ -76,9 +71,8 @@
 - name: Setup k8s worker node
   hosts: k8s-node1
   become: true
-
   tasks:
-    - name: Copy nodes.sh script to remote server
+    - name: Copy nodes.sh script to k8s worker node
       copy:
         src: nodes.sh
         dest: /root/nodes.sh
@@ -93,8 +87,10 @@
     - name: Join k8s cluster  
       shell: /root/join_cluster.sh
 
-#### Play to copy kubeconfig to jenkins server for jenkins user ####
--   name: Copy the kubeconfig form k8s-master 
+#### Plays to copy kubeconfig to jenkins server for jenkins user #### Required for Stage V & VI : Deploying application on k8s cluster #####
+
+##### PLAY 1 : COPY kubeconfig from k8s-master node to localhost #####
+-   name: Copy the kubeconfig from k8s-master 
     hosts: k8s-master
     become: true
     tasks:
@@ -104,18 +100,22 @@
         src: /root/.kube/config
         dest: buffer/
         flat: yes
-
+##### PLAY 2 : INSTALL KUBECTL, CREATE .kube direcoty in $HOME of jenkins user, copy kubeconfig from localhost buffer to Jenkins server and sets the permission to 0600 and ownership to jenkins:jenkins#####
 -   name: Jenkins User kubectl Setup
     hosts: jenkins
     become: true
     tasks:
-      - name: create directory and set ownership of .kube directory for jenkins user
+      - name: Install kubectl  
+        snap: 
+          name: kubectl
+          classic: true
+          state: present
+      - name: Create directory and set ownership of .kube directory for jenkins user
         file:
           path: /var/lib/jenkins/.kube
           state: directory
           owner: jenkins
           group: jenkins
-
       - name: Copy the file from localhost to jenkins
         copy:
           src: buffer/config

@@ -1,4 +1,4 @@
-printf "\n172.31.8.221 k8s-master\n172.31.2.180 k8s-node1\n\n" >> /etc/hosts
+printf "\n172.31.11.125 k8s-master\n172.31.8.143 k8s-node1\n\n" >> /etc/hosts
 swapoff -a
 sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
 
