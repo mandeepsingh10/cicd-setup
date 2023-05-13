@@ -11,19 +11,19 @@ node1_public_ip=`terraform -chdir="../terraform_config/node1" output | grep publ
 ./generate_ansible_inventory.sh
 ###
 echo -e "\n\033[1;32mConfiguring Jenkins server using the Ansible playbook jenkins.yaml...\033[0m\n"
-ansible-playbook -i ../ansible_config/inventory ../ansible_config/jenkins/jenkins.yaml
+ansible-playbook -i ../ansible_config/inventory ../ansible_config/jenkins/jenkins.yaml --timeout 30
 echo -e "\n\033[1;32mConfiguration completed, Jenkins running at \033[1;34mhttp://$jenkins_public_ip:8080\033[0m\n"
 
 echo -e "\033[1;32mConfiguring SonarQube server using the Ansible playbook sonar.yaml...\033[0m\n"
-ansible-playbook -i ../ansible_config/inventory ../ansible_config/sonar/sonar.yaml
+ansible-playbook -i ../ansible_config/inventory ../ansible_config/sonar/sonar.yaml --timeout 30
 echo -e "\033[1;32mConfiguration completed, SonarQube running at \033[1;34mhttp://$sonar_public_ip:9000\033[0m\n"
 
 echo -e "\n\033[1;32mConfiguring Nexus Repository Manager using the Ansible playbook nexus.yaml...\033[0m\n"
-ansible-playbook -i ../ansible_config/inventory ../ansible_config/nexus/nexus.yaml
+ansible-playbook -i ../ansible_config/inventory ../ansible_config/nexus/nexus.yaml --timeout 30
 echo -e "\n\033[1;32mConfiguration completed, Nexus Repository Manager running at \033[1;34mhttp://$nexus_public_ip:8081\033[0m\n"
 
 echo -e "\n\033[1;32mConfiguring Kubernetes cluster using the Ansible playbook k8s_cluster_setup.yaml...\033[0m\n"
-ansible-playbook -i ../ansible_config/inventory ../ansible_config/k8s/k8s_cluster_setup.yaml
+ansible-playbook -i ../ansible_config/inventory ../ansible_config/k8s/k8s_cluster_setup.yaml --timeout 30
 echo -e "\n\033[1;32mConfiguration completed, kubernetes cluster deployed\033[0m\n"
 
 echo -e "\n\033[1mThe following details can be used to access all instances/applications.\033[0m\n"
