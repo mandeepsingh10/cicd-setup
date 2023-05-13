@@ -107,12 +107,6 @@
         path: /etc/sudoers
         line: 'jenkins ALL=(ALL) NOPASSWD: ALL'    
 
-    - name: Install kubectl  #### Required for Stage V & VI : Deploying application on k8s cluster
-      snap: 
-        name: kubectl
-        classic: true
-        state: present
-
     - name: Create kubectl alias for root user
       lineinfile:
         dest: /root/.bashrc
